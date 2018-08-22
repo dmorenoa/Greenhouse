@@ -14,7 +14,7 @@ bool relay::onrelay(uint8_t relay_pin){
 }
 
 bool relay::offrelay(uint8_t relay_pin){
-    digitalWrite(relay_pin, off);
+    digitalWrite(relay_pin, LOW);
     bool estadorelay = false;
     return estadorelay;
 }

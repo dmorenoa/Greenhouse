@@ -8,7 +8,7 @@
 
 void setup() {
     Serial.begin(serialrate);
-    LM35.pinsetup(0);
+    LM35.pinsetup(pinlm35);
     //analogReference(INTERNAL);
     relay.pinsetup(uint8_t relaypin);
 }
