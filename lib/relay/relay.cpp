@@ -3,8 +3,8 @@
 
 int relay::pinsetup(int r_pinnum){
     pinMode(r_pinnum, OUTPUT);
-    int relay_pin = r_pinnum;
-    return relay_pin;
+    //int relay_pin = r_pinnum;
+    //return relay_pin;
 }
 
 bool relay::onrelay(uint8_t relay_pin){
