@@ -1,15 +1,14 @@
-#ifndef LM35_h
-#define LM35_h
+#ifndef lm35_h
+#define lm35_h
 
 #include <Arduino.h>
 
 class LM35{
     public:
-        uint8_t pinsetup(uint8_t pinnum);
+        LM35(int pin);
         float gettemp();
-        bool lm35refsetup();
     private:
-        uint8_t lm35_pin;
+        int pin;
 };
 
 #endif

@@ -1,20 +1,27 @@
 #include "relay.h"
 #include "Arduino.h"
 
-int relay::pinsetup(int r_pinnum){
-    pinMode(r_pinnum, OUTPUT);
-    //int relay_pin = r_pinnum;
-    //return relay_pin;
+
+Relay::Relay(uint8_t p){
+    pin = p;
+    state = false;
+    pinMode(pin, OUTPUT);
 }
 
-bool relay::onrelay(uint8_t relay_pin){
-    digitalWrite(relay_pin, HIGH);
-    bool estadorelay = true;
-    return estadorelay;
+bool Relay::off(){
+    digitalWrite(pin, 0);
+    state = 0;
+    return state;
 }
 
-bool relay::offrelay(uint8_t relay_pin){
-    digitalWrite(relay_pin, LOW);
-    bool estadorelay = false;
-    return estadorelay;
+bool Relay::on(){
+    digitalWrite(pin, 1);
+    state = 1;
+    return state;
+}
+
+bool Relay::swap(){
+    state = !state;
+    digitalWrite(pin, state);
+    return state;
 }

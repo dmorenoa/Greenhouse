@@ -1,18 +1,29 @@
 #include <Arduino.h>
 #include <lm35.h>
 #include <relay.h>
+#include <com.h>
 
-#define serialrate 115200
-int pinlm35 = 0;
-int relaypin = 50;
+Com com();
+Relay relay = Relay(50);
+LM35 lm35 = LM35(A1);
+int tf = 0;
 
 void setup() {
-    Serial.begin(serialrate);
-    LM35 pinsetup(pinlm35);
-    //analogReference(INTERNAL);
-    relay pinsetup(relaypin);
+    Serial.begin(9600);
+    relay.off();
 }
 
 void loop(){
-
+    int tini = millis();
+    if((tini - tf)> 2000){
+        tf = tini;
+        float temp = lm35.gettemp();
+        Serial.println(temp);
+        if(temp>=30){
+            relay.on();
+        }
+        else if(temp<30){
+            relay.off();
+        }
+    }
 }

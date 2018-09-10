@@ -3,13 +3,15 @@
 
 #include <Arduino.h>
 
-class relay{
+class Relay{
     public:
-        int pinsetup(int relaypin);
-        bool onrelay(uint8_t relay_pin);
-        bool offrelay(uint8_t relay_pin);
+        Relay(uint8_t pin);
+        bool on();
+        bool off();
+        bool swap();
     private:
-        uint8_t relaypin();
+        bool state;
+        uint8_t pin;
 };
 
 #endif
