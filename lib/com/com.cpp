@@ -1,36 +1,46 @@
-#include "relay.h"
-#include "lm35.h"
 #include "Arduino.h"
 #include "com.h"
 
-Com::Com(){
+Com::Com(uint8_t self_dir)
+{
+    dir = self_dir;
     cursor = 0;
 }
 
-bool Com::read(){
-    if(inp.available()){
+bool Com::read(Stream &inp, uint8_t check = 0)
+{
+    if (inp.available())
+    {
         uint8_t header = inp.read();
-        if (header == 0x01){
+        if (header == INIT)
+        {
             uint8_t head[3];
-            inp.read(head, 3);
-            uint8_t temp_origen = head[0];
-            uint8_t temp_destino = head[1];
-            uint8_t len = head[2];
-            uint8_t temp_buffer[len+1];
-            inp.readBytes(temp_buffer, len+1);
-            uint8_t checksum = temp_buffer[len];
+            inp.readBytes(head, 3);
+            uint8_t temp_origen = head[0];  // Read Origin
+            uint8_t temp_destino = head[1]; // Read Destination
+            uint8_t temp_len = head[2];          // Lenght of the Payload
+
+            uint8_t temp_buffer[temp_len + 1]; // Temporal Buffer
+
+            inp.readBytes(temp_buffer, temp_len + 1);
+            uint8_t checksum = temp_buffer[temp_len];
             uint16_t sum = 0;
-            for(int i=0;i<len; i++){
+            for (int i = 0; i < temp_len; i++)
+            {
                 sum += temp_buffer[i];
             }
             sum = 0xFF - byte(sum);
-            if(checksum == sum){
-                origen = temp_origen;
-                destino = temp_destino;
-                for(int i=0; i<len; i++){
+
+            bool check_destination = (temp_destino == dir || !temp_destino);
+            bool check_origin = (check == temp_origen || !check);
+            bool check_sum = (checksum == sum);
+            if (check_sum && check_destination && check_origin)
+            {
+                for (int i = 0; i < temp_len; i++)
+                {
                     inp_buffer[i] = temp_buffer[i];
                 }
-                inp_data = len/3;
+                len = temp_len;
                 return true;
             }
         }
@@ -38,111 +48,62 @@ bool Com::read(){
     return false;
 }
 
-uint8_t Com::task(uint8_t vec){
-    uint8_t taskvec[len/2];
-    uint8_t numvec[len/2];
-        for(float i=0;i<len; i++){
-            if(i%2==0){
-                numvec[i/2]=len[i];
-            }
-            else{
-                taskvec[i/2-0.5] = len[i];
+int8_t Com::checkCmd(uint8_t cmd){
+    for(int i=0; i<len; i+=2)
+    {   
+        if(inp_buffer[i] == cmd){
+            return i;
         }
     }
-    return taskvec,numvec;
+    return -1;
 }
 
-uint8_t Com::taskexec(uint8_t vect, uint8_t numv){
-    for(int i=0;i<len/2;i++){
-        uint8_t tarea = vect[i];
-        if(tarea == 0x50 ){
-            try{
-                LM35::LM35(numv[i]);
-            }
-            catch{
-                numv[i]= 0x00;
-            }
-            numv[i]= 0x01;
+uint8_t Com::getArgs(uint8_t cmd){
+    uint8_t index = checkCmd(cmd);
+    if(index != -1){
+        uint8_t temp_buffer[len];
+        for(int i=0; i<len; i++){
+            temp_buffer[i] = inp_buffer[i];
         }
-        else if(tarea == 0x51 ){
-            try{
-                uint8_t temp = LM35::gettemp();
+        for(int i = 0; i<len-2; i++){
+            if(i < index){
+                inp_buffer[i] = temp_buffer[i];
+            } else {
+                inp_buffer[i] = temp_buffer[i+2];
             }
-            catch{
-                numv[i]= 0x00;
-            }
-            numv[i]= temp;
         }
-        else if(tarea == 0x52 ){
-            try{
-                Relay::Relay(numv[i]);
-            }
-            catch{
-                numv[i]= 0x00;
-            }
-            numv[i]= 0x01;
-        }
-        else if(tarea == 0x53 ){
-            try{
-                Relay::on() ;
-            }
-            catch{
-                numv[i]= 0x00;
-            }
-            numv[i]= 0x01;
-        }
-        else if(tarea == 0x54 ){
-            try{
-                Relay::off() ;
-            }
-            catch{
-                numv[i]= 0x00;
-            }
-            numv[i]= 0x01;
-        }
-        else if(tarea == 0x55 ){
-            try{
-                Relay::swap() ;
-            }
-            catch{
-                numv[i]= 0x00;
-            }
-            numv[i]= 0x01;
-        }
-        else{
-
-        }
+        len-=2;
+        return temp_buffer[index+1];
     }
-    return numv;
+    return 0;
 }
 
-int8_t Com::calCheckSum(){
+int8_t Com::calCheckSum()
+{
     byte sum = 0;
-    for(int i=0;i<cursor; i++){
-        sum+=buffer[i];
+    for (int i = 0; i < cursor; i++)
+    {
+        sum += buffer[i];
     }
-    return byte(0xFF-sum);
+    return byte(0xFF - sum);
 }
 
-bool Com::send(uint8_t vect, uint8_t numv, uint8_t dest){
-    inp.write(0x01);
-    inp.write(0x03);  //origen= 0x003 -> Arduino
+uint8_t Com::addCmd(uint8_t cmd, uint8_t data){
+    buffer[cursor] = cmd;
+    buffer[cursor + 1] = data;
+    cursor+=2;
+    return cursor;
+}
+
+void Com::send(Stream &inp, uint8_t dest = 0)
+{
+    inp.write(INIT);
+    inp.write(dir);
     inp.write(dest);
-    inp.write(len);
-    for(int i=0;i<len/2;i++){
-        inp.write(vect[i]);
-        inp.write(numv[i]);
-        buffer[2*i] = vect[i];
-        buffer[2*i+1] = numv[i];
+    inp.write(cursor);
+    for(int i = 0; i<cursor; i++){
+        inp.write(buffer[i]);
     }
     inp.write(calCheckSum());
-    clear();
-}
-
-bool Com::checkOrigin(uint8_t ori){
-    return (origen == ori);
-}
-
-bool Com::checkDestination(uint8_t des){
-    return (destino == des);
+    cursor = 0;
 }
