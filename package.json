@@ -1,0 +1,26 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "servidor en Js ",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmorenoa/Greenhouse.git"
+  },
+  "author": "DMA",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dmorenoa/Greenhouse/issues"
+  },
+  "homepage": "https://github.com/dmorenoa/Greenhouse#readme",
+  "dependencies": {
+    "express": "^4.16.3",
+    "socket.io": "^2.1.1"
+  }
+}

@@ -1,9 +1,17 @@
 #include <Arduino.h>
-// #include <lm35.h>
-// #include <relay.h>
 #include <com.h>
+#include <relay.h>
+#include <LM35.h>
+
+#define SET_LM_35 0x50
+#define GET_TEMP 0x51
+#define SET_RELAY 0x52
+#define WR_RELAY 0x56
+#define RE_RELAY 0x57
 
 Com com = Com(0xAA);
+Relay rl = Relay(8);
+LM35 sen = LM35(1);
 
 void setup() {
     Serial.begin(9600);
@@ -13,24 +21,9 @@ void setup() {
 
 void loop(){
     if(com.read(Serial)){
-        if(com.checkCmd(SET_LM_35) != -1){
-            Serial.print("LM35: ");Serial.println(com.getArgs(SET_LM_35));
-        }
-        if(com.checkCmd(SET_LM_35) != -1){
-            Serial.print("LM35: ");Serial.println(com.getArgs(SET_LM_35));
-        }
-        if(com.checkCmd(SET_LM_35) != -1){
-            Serial.print("LM35: ");Serial.println(com.getArgs(SET_LM_35));
-        } 
-        else {
-            Serial.print("404");
-        }
+        Com output = Com(0xAA);
+        rl.execute(com, output);
+        sen.execute(com, output);
+        output.send(Serial);
     }
-
-    // com.addCmd(SET_LM_35, 10);
-    // com.addCmd(SET_LM_35, 20);
-    // com.send(Serial);
-    // while(1){
-    //     ;
-    // }
 }

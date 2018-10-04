@@ -2,11 +2,12 @@
 #define lm35_h
 
 #include <Arduino.h>
+#include <com.h>
 
 class LM35{
     public:
         LM35(int pin);
-        float gettemp();
+        bool execute(Com& com, Com& out);
     private:
         int pin;
 };

@@ -50,7 +50,7 @@ bool Com::read(Stream &inp, uint8_t check = 0)
 
 int8_t Com::checkCmd(uint8_t cmd){
     for(int i=0; i<len; i+=2)
-    {   
+    {
         if(inp_buffer[i] == cmd){
             return i;
         }

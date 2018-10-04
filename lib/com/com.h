@@ -4,11 +4,8 @@
 #include <Arduino.h>
 
 #define INIT 0x23
-#define SET_LM_35 0x50
-#define GET_TEMP 0x51
-#define SET_RELAY 0x52
 
-class Com{
+class Com {
     public:
         Com(uint8_t dir);
         bool read(Stream& inp, uint8_t check = 0);
@@ -21,8 +18,6 @@ class Com{
         uint8_t inp_buffer[90];
         uint8_t dir;
         int8_t calCheckSum();
-        bool relaystate;
-        float temp;
         uint8_t cursor;
         uint8_t buffer[90];
 };
