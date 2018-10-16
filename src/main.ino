@@ -10,7 +10,7 @@
 #define RE_RELAY 0x57
 
 Com com = Com(0xAA);
-Relay rl = Relay(8);
+Relay rl = Relay(22);
 LM35 sen = LM35(1);
 
 void setup() {

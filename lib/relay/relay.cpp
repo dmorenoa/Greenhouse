@@ -9,6 +9,7 @@ Relay::Relay(uint8_t p){
     pin = p;
     state = false;
     pinMode(pin, OUTPUT);
+    digitalWrite(pin,HIGH);
 }
 
 bool Relay::execute(Com& inp, Com& out){
